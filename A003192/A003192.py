@@ -18,9 +18,17 @@ m = Model("ip")
 # it turns out gurobi doesn't like negative numbers in string so we're adding n to everything
 vars_ij = []
 
-r = 15
-# r is some upper bound on path length
 
+r = -1
+# r is some upper bound on path length
+if n < 10:
+    r = [-1,0, 0, 2, 5, 10, 17, 24, 35, 47][n]
+
+# or bound by 1 (??) plus best known results from https://www.mayhematics.com/t/2n.htm
+else:
+    r = 5+[-1,0, 0, 2, 5, 10, 17, 24, 35, 47,61,76,94,106,135,183,211,238,268,302,337,374,414,455,499,542,588,638,689,743,789,772]
+if (n >= 10):
+    print("Warning: answer may not be optimal, just improves on known bounds")
 
 # initialize all variables of form x_i_j_k
 # nonzero values mean the kth step was at point (i,j)
@@ -71,6 +79,8 @@ for i in range(n):
 # find all the locations from which (i,j) could be attacked, add each one to the constraint
 for i in range(n):
     for j in range(n):
+        print(i,j)
+        
         var_ij = []
         for a in range(-2,3):
             for b in range(-2,3):
@@ -89,127 +99,81 @@ for i in range(n):
 
 
 # for each point, add noncrossing constraints
-for i in range(n):
-    for j in range(n):
-        var_ij = []
-        for a in range(-2,3):
-            for b in range(-2,3):
-                if abs(a) + abs(b) == 3 and 0 <= i-a < n and 0 <= j-b < n:
-                    var_ij.append((i-a,j-b))
+# for i in range(n):
+#     for j in range(n):
+#         print(i,j)
+#         var_ij = []
+#         for a in range(-2,3):
+#             for b in range(-2,3):
+#                 if (abs(a) == 2 and abs(b) ==1) or (abs(a) == 1 and abs(b) == 2):
+#                     if 0 <= i-a < n and 0 <= j-b < n:
+#                         var_ij.append((i-a,j-b))
+
+
+# |       | c,d   |       |       |
+# |_______|_______|_______|_______|
+# |       |       |       |       |
+# | a,b   |       |       |  e,f  |
+# |_______|_______|_______|_______|
+# |       |       |       |       |
+# |       |       |  i,j  |       |
+# |_______|_______|_______|_______|
+
 
         for (a,b) in var_ij:
-            intersect_loci = []
-            for x in range(i-1,i+2):
-                for y in range(j-1,j+2):
-                    if abs(i-x)**2 + abs(j-y)**2+abs(a-x)**2+ abs(b-y)**2 == 3:
-                        intersect_loci.append((x,y))
-                        # this should contain exactly 2 points by the end
+
+            # run through all lines between points in range(min(a,i)-2,max(a,i)+3) 
+            #                                         range(min(b,j)-2,max(b,j)+3) 
+            # see if their intersection is in the interval [min(a,i),max(a,i)]
+            #                                              [min(b,j),max(b,j)]
             
-            assert len(intersect_loci)==2
-
-            # decide (x1,y1) is the one adjacent to (i-a,j-b)
-            #        (x2,y2) is the one adjacent to (i,j)
-            x1,y1 = intersect_loci[0]
-            x2,y2 = intersect_loci[1]
-
-            if not (x1 == a or y1 == b):
-                x1,y1 = intersect_loci[1]
-                x2,y2 = intersect_loci[0]
-
-            assert(x1 == a or y1 == b)
-
-# |  O    |       |  O    |       |
-# |_______|_______|_______|_______|
-# |       |       |       |       |
-# | a,b   | x1,y1 |       |   O   |
-# |_______|_______|_______|_______|
-# |       |       |       |       |
-# |       | x2,y2 |  i,j  |       |
-# |_______|_______|_______|_______|
-
-            for k in range(1,r):
-
-                s  = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                s += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                # edges are undirected
-                s += "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                s += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-    #           (x2,y2) <--> (2*x1-i,2*y1-j) edge must be removed
-    #           (x2,y2) <--> (2*x1-a,y1-j) edge must be removed
-    #           (x2,y2) <--> (2*x1-a,y1-j) edge must be removed
-                for (X1,Y1) in [(a,2*y1-y2), (i,2*y1-y2),(2*i-x2,b)]:
-                    if 0 <= X1 < n and 0 <= Y1 < n:
-                        for l in range(1,r):
-                            t  = "x_" + str(X1) + "_" + str(Y1) + "_" + str(l) + "+"
-                            t += "x_" + str(x2) + "_" + str(y2) + "_" + str(l-1) + "+"
-                            t += "x_" + str(X1) + "_" + str(Y1) + "_" + str(l-1) + "+"
-                            t += "x_" + str(x2) + "_" + str(y2) + "_" + str(l)
-                            exec("m.addLConstr(" + s + t + "<= 3)")
+            for c in range(max(min(a,i)-2,0),min(max(a,i)+3,n)):
+                for d in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
+                    if (c,d) != (a,b) and (c,d) != (i,j):
+                        for e in range(max(min(a,i)-2,0),min(max(a,i)+3,n)):
+                            for f in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
+                                if ((e,f) != (a,b) and (e,f) != (i,j)) and (e,f) != (c,d):
+                                    if abs(c-e) + abs(d-f) == 3:
+                                        if (b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j) != 0:
 
 
-# |       |       |       |       |       |
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |       | a,b   | x1,y1 |       |       |
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |   O   |       | x2,y2 |  i,j  |       |
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |       |  O    |       |  O    |       |
-# |_______|_______|_______|_______|_______|
+                                            # line between  (a,b) <-> (i,j)
+                                            # y = x(b-j)/(a-i) + (aj-bi)/(a-i)
 
-            for k in range(1,r):
+                                            # line between  (c,d) <-> (e,f)
+                                            # y = x(d-f)/(c-e) + (cf-de)/(c-e)
 
-                s  = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                s += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                # edges are undirected
-                s += "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                s += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-    #           (x2,y2) <--> (2*x1-i,2*y1-j) edge must be removed
-    #           (x2,y2) <--> (2*x1-a,y1-j) edge must be removed
-    #           (x2,y2) <--> (2*x1-a,y1-j) edge must be removed
-                for (X1,Y1) in [(a,2*y2-y1), (i,2*y2-y1),(2*a-x1,j)]:
-                    if 0 <= X1 < n and 0 <= Y1 < n:
-                        for l in range(1,r):
-                            t  = "x_" + str(X1) + "_" + str(Y1) + "_" + str(l) + "+"
-                            t += "x_" + str(x1) + "_" + str(y1) + "_" + str(l-1) + "+"
-                            t += "x_" + str(X1) + "_" + str(Y1) + "_" + str(l-1) + "+"
-                            t += "x_" + str(x1) + "_" + str(y1) + "_" + str(l)
-                            exec("m.addLConstr(" + s + t + "<= 3)")
+                                            # intersect at 
+                                            # x = (-a d e + a c f + b c i - b e i + d e i - c f i - a c j + a e j)/(b c - a d - b e + a f + d i - f i - c j + e j)
+                                            # y = (-b d e + b c f + b d i - b f i - a d j + d e j + a f j - c f j)/(b c - a d - b e + a f + d i - f i - c j + e j)
+                                            x0 = (-a*d*e + a*c*f + b*c*i - b*e*i + d*e*i - c*f*i - a*c*j + a*e*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
+                                            y0 = (-b*d*e + b*c*f + b*d*i - b*f*i - a*d*j + d*e*j + a*f*j - c*f*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
 
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |       |       | u2,v2 |       |       |
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |       | a,b   | x1,y1 | u4,v4 |       |
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |       | u1,v1 | x2,y2 |  i,j  |       |
-# |_______|_______|_______|_______|_______|
-# |       |       |       |       |       |
-# |       |       | u3,v3 |       |       |
-# |_______|_______|_______|_______|_______|
-
-
-            for k in range(1,r):
-                s  = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                s += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                # edges are undirected
-                s += "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                s += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-    #           (u1,v1) <--> (u2,v2) edge must be removed
-    #           (u3,v3) <--> (u4,v4) edge must be removed
-    #           (u1,v1) <--> (u4,v4) edge must be removed
-                for (X1,Y1,X2,Y2) in [(a,j,x1,2*y1-y2), (x2,2*y2-y1,i,b),(a,j,i,b)]:
-                    if 0 <= X1 < n and 0 <= Y1 < n and 0 <= X2 < n and 0 <= Y2 < n:
-                        for l in range(1,r):
-                            t  = "x_" + str(X1) + "_" + str(Y1) + "_" + str(l) + "+"
-                            t += "x_" + str(X2) + "_" + str(Y2) + "_" + str(l-1) + "+"
-                            t += "x_" + str(X1) + "_" + str(Y1) + "_" + str(l-1) + "+"
-                            t += "x_" + str(X2) + "_" + str(Y2) + "_" + str(l)
-                            exec("m.addLConstr(" + s + t + "<= 3)")
+                                            if min(a,i) <= x0 <= max(a,i) and min(b,j) <= y0 <= max(b,j):
+                                                if min(c,e) <= x0 <= max(c,e) and min(d,f) <= y0 <= max(d,f):
+                                                # must exclude simultaneous pairs (a,b),(i,j),(c,d),(e,f)
+                                                    for k in range(1,r):
+                                                        for l in range(1,r):
+                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
+                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
+                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
+                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
+                                                            exec("m.addLConstr(" + s + "<= 3)")
+                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
+                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
+                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
+                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
+                                                            exec("m.addLConstr(" + s + "<= 3)")
+                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
+                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
+                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
+                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
+                                                            exec("m.addLConstr(" + s + "<= 3)")
+                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
+                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
+                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
+                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
+                                                            exec("m.addLConstr(" + s + "<= 3)")
 
 
 m.optimize()
