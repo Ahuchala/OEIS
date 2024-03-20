@@ -35,35 +35,31 @@ for i in range(n):
             
 # Set objective: maximize sum of x_i_j_k's
 
-t = ""
+obj = LinExpr(-1)
 for i in range(n):
     for j in range(n):
         for k in range(r):
-            t += "+x_" + str(i) + "_" + str(j)+"_" + str(k)
-t = t[1:] + "- 1"
-        
-exec("obj = " + t)
+            exec("obj.addTerms(1,x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
 m.setObjective(obj, GRB.MAXIMIZE)
 
 
 # only allow one occupied tile per step
+
 for k in range(r):
-    s = ""
+    s = LinExpr(0)
     for i in range(n):
         for j in range(n):
-            s += "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
+            exec("s.addTerms(1,x_" + str(i) + "_" + str(j) + "_" + str(k) +")")
 
-    s = s[:-1]
-    exec("m.addLConstr(" + str(s) + "<= 1)")
+    exec("m.addLConstr(s<= 1)")
 
 # only occupy each tile once
 for i in range(n):
     for j in range(n):
-        s = ""
+        s = LinExpr(0)
         for k in range(r):
-            s += "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-        s = s[:-1]
-        exec("m.addLConstr(" + str(s) + "<= 1)")
+            exec("s.addTerms(1,x_" + str(i) + "_" + str(j) + "_" + str(k) + ")")
+        exec("m.addLConstr(s<= 1)")
 
 
 # find all the locations from which (i,j) could be attacked, add each one to the constraint
@@ -77,11 +73,10 @@ for i in range(n):
                 if abs(a) + abs(b) == 3 and 0 <= i-a < n and 0 <= j-b < n:
                         var_ij.append((i-a,j-b))
         for k in range(1,r):
-            s = ""
+            s = LinExpr(0)
             for (a,b) in var_ij:
-                s += "x_" + str(a) + "_" + str(b)+ "_" + str(k-1) + "+"
-            s = s[:-1]
-            exec("m.addLConstr(" + "x_" + str(i) + "_" + str(j)+ "_" + str(k) + "<=" + str(s) + ")")
+                exec("s.addTerms(1,x_" + str(a) + "_" + str(b)+ "_" + str(k-1) +")")
+            exec("m.addLConstr(" + "x_" + str(i) + "_" + str(j)+ "_" + str(k) + "<= s)")
 
 
 # enforce non crossing
@@ -105,9 +100,10 @@ for i in range(n):
 
             # can always assume a < i
             if a < i:
-                min_ai = min(a,i); max_ai = max(a,i)
+                min_ai = a; max_ai = i; # min_ai = min(a,i); max_ai = max(a,i)
                 for c in range(max(min_ai-2,0),min(max_ai+3,n)):
                     for d in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
+                        # must exclude simultaneous pairs (a,b),(i,j),(c,d),(e,f)
                         if (c,d) != (a,b) and (c,d) != (i,j):
                             # can always assume c < e
                             for e in range(max(c+1,max(min_ai-2,0)),min(max_ai+3,n)):
@@ -126,29 +122,28 @@ for i in range(n):
 
                                                 if min_ai <= x0 <= max_ai and min(b,j) <= y0 <= max(b,j):
                                                     if min(c,e) <= x0 <= max(c,e) and min(d,f) <= y0 <= max(d,f):
-                                                    # must exclude simultaneous pairs (a,b),(i,j),(c,d),(e,f)
                                                         for k in range(1,r):
                                                             for l in range(1,r):
-                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
-                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
-                                                                exec("m.addLConstr(" + s + "<= 3)")
-                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
-                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
-                                                                exec("m.addLConstr(" + s + "<= 3)")
-                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
-                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
-                                                                exec("m.addLConstr(" + s + "<= 3)")
-                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
-                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
-                                                                exec("m.addLConstr(" + s + "<= 3)")
+                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
+                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
+                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
+                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
+                                                                m.addLConstr(s <= 3)
+                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
+                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
+                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
+                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
+                                                                m.addLConstr(s <= 3)
+                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
+                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
+                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
+                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
+                                                                m.addLConstr(s <= 3)
+                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
+                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
+                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
+                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
+                                                                m.addLConstr(s <= 3)
 
 
 m.optimize()
