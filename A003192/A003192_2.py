@@ -13,9 +13,14 @@ import math
 m = Model("ip")
 
 
+        
+# make a set of admissible (i,j) pairs
+# it turns out gurobi doesn't like negative numbers in string so we're adding n to everything
+vars_ij = []
+
+
 r = -1
 # r is some upper bound on path length
-# add one from A003192[n] since I'm secretly using it for vertex count
 if n < 10:
     r = 1+[-1,0, 0, 2, 5, 10, 17, 24, 35, 47][n]
 
@@ -31,15 +36,24 @@ for i in range(n):
     for j in range(n):
         for k in range(r):
             exec("x_" + str(i) + "_" + str(j)+"_" + str(k)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(i) + "_" + str(j)+ "_" + str(k) + "\")")
-            
-            
-# Set objective: maximize sum of x_i_j_k's
+for i in range(n):
+    for k in range(r):
+        exec("x_" + str(i) + "_" + str(k) + " = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(i) + "_" + str(k) + "\")")
+
+for j in range(n):
+    for k in range(r):
+        exec("y_" + str(j) + "_" + str(k) + " = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"y_" + str(j)+ "_" + str(k) + "\")")
+
+
+# Set objective: maximize sum of x_i_k's
+
 
 t = ""
+
 for i in range(n):
     for j in range(n):
         for k in range(r):
-            t += "+x_" + str(i) + "_" + str(j)+"_" + str(k)
+            t += "+x_" + str(i) + "_" + str(j) + "_" + str(k)
 t = t[1:] + "- 1"
         
 exec("obj = " + t)
@@ -57,6 +71,7 @@ for k in range(r):
     exec("m.addLConstr(" + str(s) + "<= 1)")
 
 # only occupy each tile once
+
 for i in range(n):
     for j in range(n):
         s = ""
@@ -64,6 +79,19 @@ for i in range(n):
             s += "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
         s = s[:-1]
         exec("m.addLConstr(" + str(s) + "<= 1)")
+
+# bind xijk to xik and yjk
+
+for i in range(n):
+    for j in range(n):
+        for k in range(r):
+            # x_i_j_k = and(x_i_k,y_j_k)
+            s = "m.addGenConstrAnd(" + "x_" + str(i) + "_" + str(j) + "_" + str(k) + ",["
+            s += "x_" + str(i) + "_" + str(k) + ","
+            s += "y_" + str(j) + "_" + str(k) + "])"
+            exec(s)
+
+
 
 
 # find all the locations from which (i,j) could be attacked, add each one to the constraint
@@ -86,6 +114,7 @@ for i in range(n):
 
 # enforce non crossing
 
+
 # |       | c,d   |       |       |
 # |_______|_______|_______|_______|
 # |       |       |       |       |
@@ -95,34 +124,38 @@ for i in range(n):
 # |       |       |  i,j  |       |
 # |_______|_______|_______|_______|
 
+
         for (a,b) in var_ij:
 
             # run through all lines between points in range(min(a,i)-2,max(a,i)+3) 
             #                                         range(min(b,j)-2,max(b,j)+3) 
             # see if their intersection is in the interval [min(a,i),max(a,i)]
             #                                              [min(b,j),max(b,j)]
-            #          and same for (c,d), (e,f)
+            # and same for (c,d), (e,f)
             
-            min_ai = min(a,i); max_ai = max(a,i)
-            for c in range(max(min_ai-2,0),min(max_ai+3,n)):
+            for c in range(max(min(a,i)-2,0),min(max(a,i)+3,n)):
                 for d in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
                     if (c,d) != (a,b) and (c,d) != (i,j):
-                        # can always assume c < e
-                        for e in range(max(c+1,max(min_ai-2,0)),min(max_ai+3,n)):
+                        for e in range(max(min(a,i)-2,0),min(max(a,i)+3,n)):
                             for f in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
-                                if ((e,f) != (a,b) and (e,f) != (i,j)):# and (e,f) != (c,d):
+                                if ((e,f) != (a,b) and (e,f) != (i,j)) and (e,f) != (c,d):
                                     if abs(c-e) + abs(d-f) == 3:
-                                        if (b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j) != 0: # if lines not parallel
+                                        if (b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j) != 0:
 
 
-# line between    (a,b) <-> (i,j)           y = x(b-j)/(a-i) + (aj-bi)/(a-i)
-# line between    (c,d) <-> (e,f)           y = x(d-f)/(c-e) + (cf-de)/(c-e)
+                                            # line between  (a,b) <-> (i,j)
+                                            # y = x(b-j)/(a-i) + (aj-bi)/(a-i)
+
+                                            # line between  (c,d) <-> (e,f)
+                                            # y = x(d-f)/(c-e) + (cf-de)/(c-e)
 
                                             # intersect at 
+                                            # x = (-a d e + a c f + b c i - b e i + d e i - c f i - a c j + a e j)/(b c - a d - b e + a f + d i - f i - c j + e j)
+                                            # y = (-b d e + b c f + b d i - b f i - a d j + d e j + a f j - c f j)/(b c - a d - b e + a f + d i - f i - c j + e j)
                                             x0 = (-a*d*e + a*c*f + b*c*i - b*e*i + d*e*i - c*f*i - a*c*j + a*e*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
                                             y0 = (-b*d*e + b*c*f + b*d*i - b*f*i - a*d*j + d*e*j + a*f*j - c*f*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
 
-                                            if min_ai <= x0 <= max_ai and min(b,j) <= y0 <= max(b,j):
+                                            if min(a,i) <= x0 <= max(a,i) and min(b,j) <= y0 <= max(b,j):
                                                 if min(c,e) <= x0 <= max(c,e) and min(d,f) <= y0 <= max(d,f):
                                                 # must exclude simultaneous pairs (a,b),(i,j),(c,d),(e,f)
                                                     for k in range(1,r):
@@ -158,37 +191,3 @@ m.optimize()
 print('Obj: %g' % obj.getValue())
 if obj.getValue() == r-1 and n > 9:
     print("Warning: answer may not be optimal, just improves on known bounds")
-
-
-# uncomment this to plot
-# ijk_list = []
-# printstr = ""
-# for i in range(n):
-#     for j in range(n):
-#         for k in range(r):
-#             v = m.getVarByName("x_" + str(i) + "_" + str(j) + "_" + str(k))
-#             if int(v.x+0.4) > 0:
-# #                 x,i,j,k = str(v).split("_")
-
-# #                 k = int(k.split(" (")[0])
-# #                 i = int(i)
-# #                 j = int(j)
-#                 ijk_list.append((i,j,k))
-# #         printstr += str(int(v.x))
-# import numpy as np
-# import matplotlib.pyplot as plt
-
-# plt.rcParams["figure.figsize"] = (10,10)
-
-
-# xy_ls = sorted(ijk_list,key = lambda blah : blah[2])
-
-# # plt.colorbar()
-# plt.axis('off')
-
-# for i in range(len(xy_ls)-1):
-#     plt.plot([xy_ls[i][0],xy_ls[i+1][0]],[xy_ls[i][1],xy_ls[i+1][1]])
-
-# for _ in range(n):
-#     for __ in range(n):
-#         plt.plot(_,__,'bo')
