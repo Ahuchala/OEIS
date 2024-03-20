@@ -72,10 +72,10 @@ for i in range(n):
         print(i,j)
         
         var_ij = []
-        for a in range(-2,3):
+        for a in range(-2,3): 
             for b in range(-2,3):
                 if abs(a) + abs(b) == 3 and 0 <= i-a < n and 0 <= j-b < n:
-                    var_ij.append((i-a,j-b))
+                        var_ij.append((i-a,j-b))
         for k in range(1,r):
             s = ""
             for (a,b) in var_ij:
@@ -102,51 +102,53 @@ for i in range(n):
             # see if their intersection is in the interval [min(a,i),max(a,i)]
             #                                              [min(b,j),max(b,j)]
             #          and same for (c,d), (e,f)
-            
-            min_ai = min(a,i); max_ai = max(a,i)
-            for c in range(max(min_ai-2,0),min(max_ai+3,n)):
-                for d in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
-                    if (c,d) != (a,b) and (c,d) != (i,j):
-                        # can always assume c < e
-                        for e in range(max(c+1,max(min_ai-2,0)),min(max_ai+3,n)):
-                            for f in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
-                                if ((e,f) != (a,b) and (e,f) != (i,j)):# and (e,f) != (c,d):
-                                    if abs(c-e) + abs(d-f) == 3:
-                                        if (b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j) != 0: # if lines not parallel
+
+            # can always assume a < i
+            if a < i:
+                min_ai = min(a,i); max_ai = max(a,i)
+                for c in range(max(min_ai-2,0),min(max_ai+3,n)):
+                    for d in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
+                        if (c,d) != (a,b) and (c,d) != (i,j):
+                            # can always assume c < e
+                            for e in range(max(c+1,max(min_ai-2,0)),min(max_ai+3,n)):
+                                for f in range(max(min(b,j)-2,0),min(max(b,j)+3,n)):
+                                    if ((e,f) != (a,b) and (e,f) != (i,j)):# and (e,f) != (c,d):
+                                        if abs(c-e) + abs(d-f) == 3:
+                                            if (b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j) != 0: # if lines not parallel
 
 
-# line between    (a,b) <-> (i,j)           y = x(b-j)/(a-i) + (aj-bi)/(a-i)
-# line between    (c,d) <-> (e,f)           y = x(d-f)/(c-e) + (cf-de)/(c-e)
+        # line between    (a,b) <-> (i,j)           y = x(b-j)/(a-i) + (aj-bi)/(a-i)
+        # line between    (c,d) <-> (e,f)           y = x(d-f)/(c-e) + (cf-de)/(c-e)
 
-                                            # intersect at 
-                                            x0 = (-a*d*e + a*c*f + b*c*i - b*e*i + d*e*i - c*f*i - a*c*j + a*e*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
-                                            y0 = (-b*d*e + b*c*f + b*d*i - b*f*i - a*d*j + d*e*j + a*f*j - c*f*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
+                                                # intersect at 
+                                                x0 = (-a*d*e + a*c*f + b*c*i - b*e*i + d*e*i - c*f*i - a*c*j + a*e*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
+                                                y0 = (-b*d*e + b*c*f + b*d*i - b*f*i - a*d*j + d*e*j + a*f*j - c*f*j)/(b*c - a*d - b*e + a*f + d*i - f*i - c*j + e*j)
 
-                                            if min_ai <= x0 <= max_ai and min(b,j) <= y0 <= max(b,j):
-                                                if min(c,e) <= x0 <= max(c,e) and min(d,f) <= y0 <= max(d,f):
-                                                # must exclude simultaneous pairs (a,b),(i,j),(c,d),(e,f)
-                                                    for k in range(1,r):
-                                                        for l in range(1,r):
-                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
-                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
-                                                            exec("m.addLConstr(" + s + "<= 3)")
-                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
-                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
-                                                            exec("m.addLConstr(" + s + "<= 3)")
-                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
-                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
-                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
-                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
-                                                            exec("m.addLConstr(" + s + "<= 3)")
-                                                            s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
-                                                            s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
-                                                            s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
-                                                            s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
-                                                            exec("m.addLConstr(" + s + "<= 3)")
+                                                if min_ai <= x0 <= max_ai and min(b,j) <= y0 <= max(b,j):
+                                                    if min(c,e) <= x0 <= max(c,e) and min(d,f) <= y0 <= max(d,f):
+                                                    # must exclude simultaneous pairs (a,b),(i,j),(c,d),(e,f)
+                                                        for k in range(1,r):
+                                                            for l in range(1,r):
+                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
+                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
+                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
+                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
+                                                                exec("m.addLConstr(" + s + "<= 3)")
+                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
+                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
+                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l) + "+"
+                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l-1)
+                                                                exec("m.addLConstr(" + s + "<= 3)")
+                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k) + "+"
+                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k-1) + "+"
+                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
+                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
+                                                                exec("m.addLConstr(" + s + "<= 3)")
+                                                                s   = "x_" + str(i) + "_" + str(j) + "_" + str(k-1) + "+"
+                                                                s  += "x_" + str(a) + "_" + str(b) + "_" + str(k) + "+"
+                                                                s  += "x_" + str(c) + "_" + str(d) + "_" + str(l-1) + "+"
+                                                                s  += "x_" + str(e) + "_" + str(f) + "_" + str(l)
+                                                                exec("m.addLConstr(" + s + "<= 3)")
 
 
 m.optimize()
