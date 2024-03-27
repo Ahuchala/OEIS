@@ -53,25 +53,40 @@ for j in range(n):
             # find all the locations from which (i,j) could be attacked, add each one to the constraint
             # for (i,j): (i,j) must be attacked or occupied
             
-            s = "m.addGenConstrIndicator("
-            s += "x_" + str(i) + "_" + str(j) + ",1,"
+            s = "m.addLConstr("
+            s += "x_" + str(i) + "_" + str(j) + "+"
             for k in range(2*n):
                 if k != j and k < n:
                     a,b = i,k
                     if a >= b and a < 2*n - b:
                         s += "x_" + str(a) + "_" + str(b) + "+"
+            s = s[:-1]
+            exec(s+ "<= 1)")
+            s = "m.addLConstr("
+            s += "x_" + str(i) + "_" + str(j) + "+"
+            for k in range(2*n):
                     # s += "x_" + str(i) + "_" + str(k) + "+"
                 if k != i:
                     a,b = k,j
                     if a >= b and a < 2*n - b:
                         s += "x_" + str(a) + "_" + str(b) + "+"
                     # s += "x_" + str(k) + "_" + str(j) + "+"
+            s = s[:-1]
+            exec(s+ "<= 1)")
+            s = "m.addLConstr("
+            s += "x_" + str(i) + "_" + str(j) + "+"
+            for k in range(2*n):
                 if i-j+k>=0 and i-j+k< 2*n and k < n:
                     if k != j or (i-j+k) != i: 
                         a,b = i-j+k,k
                         if a >= b and a < 2*n - b:
                             s += "x_" + str(a) + "_" + str(b) + "+"
                         # s += "x_" + str(i-j+k) + "_" + str(k) + "+"
+            s = s[:-1]
+            exec(s+ "<= 1)")
+            s = "m.addLConstr("
+            s += "x_" + str(i) + "_" + str(j) + "+"
+            for k in range(2*n):
                 if 2*i-(i-j+k)>=0 and 2*i-(i-j+k)<2*n and k < n:
                     if k != j or 2*i-(i-j+k) != i:
                         a,b = 2*i-(i-j+k), k
@@ -79,8 +94,11 @@ for j in range(n):
                             s += "x_" + str(a) + "_" + str(b) + "+"
 
             s = s[:-1]
+            exec(s+ "<= 1)")
 
-            exec(s+ "==0)")
+        # else:
+            # exec("m.addLConstr(x_" + str(i) + "_" + str(j) + "==0)")
+
 
 
 m.optimize()
