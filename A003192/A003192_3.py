@@ -89,17 +89,17 @@ for k in range(r):
 # if x_i_k == y_j_k == 1 then x_i_l != 1 or y_j_l != 1 for all l != k
 
 # only occupy each tile once
-for i in range(n):
-    for j in range(n):
-        for k in range(r):
-            for l in range(r):
-                if l != k:
-                    s = LinExpr(0)
-                    exec("s.addTerms(1,x_" + str(i) + "_" + str(k) +")")
-                    exec("s.addTerms(1,y_" + str(j) + "_" + str(k) +")")
-                    exec("s.addTerms(1,x_" + str(i) + "_" + str(l) +")")
-                    exec("s.addTerms(1,y_" + str(j) + "_" + str(l) +")")
-                    exec("m.addLConstr(s<= 3)")
+
+for k in range(r): # can assume k > l
+    for l in range(k):
+        for i in range(n):
+            for j in range(n):
+                s = LinExpr(0)
+                exec("s.addTerms(1,x_" + str(i) + "_" + str(k) +")")
+                exec("s.addTerms(1,y_" + str(j) + "_" + str(k) +")")
+                exec("s.addTerms(1,x_" + str(i) + "_" + str(l) +")")
+                exec("s.addTerms(1,y_" + str(j) + "_" + str(l) +")")
+                exec("m.addLConstr(s<= 3)")
 
 
         # for k in range(r):
@@ -184,66 +184,66 @@ for i in range(n):
                                             # if min_ai <= x0 <= max_ai and min(b,j) <= y0 <= max(b,j):
                                                 min_df = min(d,f); max_df = max(d,f)
                                                 if min_ce < x0 and x0 < max_ce and min_df < y0 and y0 < max_df:
-                                                    for k in range(1,r):
-                                                        for l in range(1,r):
-                                                            if k != l:
+                                                    for k in range(1,r): #can assume k > l
+                                                        for l in range(1,k):
+                                                            # if k != l:
 
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(k)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(k-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,y_" + str(j) + "_" + str(k)+")")
-                                                                exec("s.addTerms(1,y_" + str(b) + "_" + str(k-1) + ")")
-                                                                exec("s.addTerms(1,y_" + str(d) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,y_" + str(f) + "_" + str(l-1) + ")")
-                                                                m.addLConstr(s <= 7)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(k)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(k-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,y_" + str(j) + "_" + str(k)+")")
+                                                            exec("s.addTerms(1,y_" + str(b) + "_" + str(k-1) + ")")
+                                                            exec("s.addTerms(1,y_" + str(d) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,y_" + str(f) + "_" + str(l-1) + ")")
+                                                            m.addLConstr(s <= 7)
 
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(k-1)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(k) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,y_" + str(j) + "_" + str(k-1)+")")
-                                                                exec("s.addTerms(1,y_" + str(b) + "_" + str(k) + ")")
-                                                                exec("s.addTerms(1,y_" + str(d) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,y_" + str(f) + "_" + str(l-1) + ")")
-                                                                m.addLConstr(s <= 7)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(k-1)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(k) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,y_" + str(j) + "_" + str(k-1)+")")
+                                                            exec("s.addTerms(1,y_" + str(b) + "_" + str(k) + ")")
+                                                            exec("s.addTerms(1,y_" + str(d) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,y_" + str(f) + "_" + str(l-1) + ")")
+                                                            m.addLConstr(s <= 7)
 
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(k)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(k-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,y_" + str(j) + "_" + str(k)+")")
-                                                                exec("s.addTerms(1,y_" + str(b) + "_" + str(k-1) + ")")
-                                                                exec("s.addTerms(1,y_" + str(d) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,y_" + str(f) + "_" + str(l) + ")")
-                                                                m.addLConstr(s <= 7)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(k)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(k-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,y_" + str(j) + "_" + str(k)+")")
+                                                            exec("s.addTerms(1,y_" + str(b) + "_" + str(k-1) + ")")
+                                                            exec("s.addTerms(1,y_" + str(d) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,y_" + str(f) + "_" + str(l) + ")")
+                                                            m.addLConstr(s <= 7)
 
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(k-1)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(k) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,y_" + str(j) + "_" + str(k-1)+")")
-                                                                exec("s.addTerms(1,y_" + str(b) + "_" + str(k) + ")")
-                                                                exec("s.addTerms(1,y_" + str(d) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,y_" + str(f) + "_" + str(l) + ")")
-                                                                m.addLConstr(s <= 7)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(k-1)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(k) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,y_" + str(j) + "_" + str(k-1)+")")
+                                                            exec("s.addTerms(1,y_" + str(b) + "_" + str(k) + ")")
+                                                            exec("s.addTerms(1,y_" + str(d) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,y_" + str(f) + "_" + str(l) + ")")
+                                                            m.addLConstr(s <= 7)
 
 
-                                                                # exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
-                                                                # exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
-                                                                # exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
-                                                                # exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
-                                                                # m.addLConstr(s <= 3)
-                                                                # exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
-                                                                # exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
-                                                                # exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
-                                                                # exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
-                                                                # m.addLConstr(s <= 3)
-                                                                # exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
-                                                                # exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
-                                                                # exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
-                                                                # exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
-                                                                # m.addLConstr(s <= 3)
+                                                            # exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
+                                                            # exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
+                                                            # exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
+                                                            # exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
+                                                            # m.addLConstr(s <= 3)
+                                                            # exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
+                                                            # exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
+                                                            # exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
+                                                            # exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
+                                                            # m.addLConstr(s <= 3)
+                                                            # exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
+                                                            # exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
+                                                            # exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
+                                                            # exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
+                                                            # m.addLConstr(s <= 3)
 
 
 m.optimize()

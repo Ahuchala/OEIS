@@ -1,3 +1,5 @@
+# This version appears slightly slower
+
 # Code written by Andy Huchala
 # Computes a(n) for OEIS A003192 
 # max length of uncrossed knight's path on an n X n board.
@@ -140,30 +142,28 @@ for i in range(n):
                                                 min_df = min(d,f); max_df = max(d,f)
                                                 if min_ce < x0 and x0 < max_ce and min_df < y0 and y0 < max_df:
                                                     for k in range(1,r): #can assume k > l
-                                                        for l in range(1,r): # only need l in range(1,k) but
-                                                                             # gurobi seems to solve it faster
-                                                                             # like this
-                                                            if k != l:
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
-                                                                m.addLConstr(s <= 3)
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
-                                                                m.addLConstr(s <= 3)
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
-                                                                m.addLConstr(s <= 3)
-                                                                exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
-                                                                exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
-                                                                exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
-                                                                exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
-                                                                m.addLConstr(s <= 3)
+                                                        for l in range(1,k):
+                                                            # if k != l:
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
+                                                            m.addLConstr(s <= 3)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l-1) + ")")
+                                                            m.addLConstr(s <= 3)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
+                                                            m.addLConstr(s <= 3)
+                                                            exec("s = LinExpr( x_" + str(i) + "_" + str(j) + "_" + str(k-1)+")")
+                                                            exec("s.addTerms(1,x_" + str(a) + "_" + str(b) + "_" + str(k) + ")")
+                                                            exec("s.addTerms(1,x_" + str(c) + "_" + str(d) + "_" + str(l-1) + ")")
+                                                            exec("s.addTerms(1,x_" + str(e) + "_" + str(f) + "_" + str(l) + ")")
+                                                            m.addLConstr(s <= 3)
 
 
 m.optimize()
@@ -178,3 +178,34 @@ if obj.getValue() == r-1 and n > 9:
 
 
 # uncomment this to plot
+# ijk_list = []
+# printstr = ""
+# for i in range(n):
+#     for j in range(n):
+#         for k in range(r):
+#             v = m.getVarByName("x_" + str(i) + "_" + str(j) + "_" + str(k))
+#             if int(v.x+0.4) > 0:
+# #                 x,i,j,k = str(v).split("_")
+
+# #                 k = int(k.split(" (")[0])
+# #                 i = int(i)
+# #                 j = int(j)
+#                 ijk_list.append((i,j,k))
+# #         printstr += str(int(v.x))
+# import numpy as np
+# import matplotlib.pyplot as plt
+
+# plt.rcParams["figure.figsize"] = (10,10)
+
+
+# xy_ls = sorted(ijk_list,key = lambda blah : blah[2])
+
+# # plt.colorbar()
+# plt.axis('off')
+
+# for i in range(len(xy_ls)-1):
+#     plt.plot([xy_ls[i][0],xy_ls[i+1][0]],[xy_ls[i][1],xy_ls[i+1][1]])
+
+# for _ in range(n):
+#     for __ in range(n):
+#         plt.plot(_,__,'bo')
