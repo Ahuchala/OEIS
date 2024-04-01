@@ -1,9 +1,10 @@
-# Code written by Andy Huchala
-# Computes a(n) for OEIS A352241
-# (the maximal number of nonattacking
- # black-square queens on an n x n board)
+# this is incorrect
 
-# possible g.f. (1 + z^3 + z^4 + z^6)/(1 - z - z^5 + z^6)
+# Code written by Andy Huchala
+# Computes a(n) for OEIS A075458
+# (the minimal number of queens to threaten or occupy
+# all tiles on an n x n board
+
 
 # Requires installing Gurobi
 
@@ -16,8 +17,7 @@ m = Model("ip")
 # initialize all variables of form x_j_i
 for i in range(n):
     for j in range(n):
-        if (i + j) % 2 == 0:
-            exec("x_" + str(i) + "_" + str(j)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(i) + "_" + str(j) + "\")")
+        exec("x_" + str(i) + "_" + str(j)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(i) + "_" + str(j) + "\")")
         
 
 # Set objective: maximize sum of x_i_j's
@@ -26,8 +26,7 @@ obj = LinExpr(0)
 
 for i in range(n):
     for j in range(n):
-        if (i + j) % 2 == 0:
-            exec("obj.add(x_" + str(i) + "_" + str(j) +")")
+        exec("obj.add(x_" + str(i) + "_" + str(j) +")")
 
 m.setObjective(obj, GRB.MAXIMIZE)
 
@@ -43,40 +42,36 @@ for a in range(n):
     s = LinExpr(0)
     for i in range(n):
         for j in range(n):
-            if (i + j) % 2 == 0:
-                if a == i:
-                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
-    m.addLConstr(s<=1)
+            if a == i:
+                exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s>=1)
 
 # rows
 for b in range(n):
     s = LinExpr(0)
     for i in range(n):
         for j in range(n):
-            if (i + j) % 2 == 0:
-                if b == j:
-                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
-    m.addLConstr(s<=1)
+            if b == j:
+                exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s>=1)
 
 # \\ diagonal
-for k in range(-n,n):
+for k in range(-n+1,n):
     s = LinExpr(0)
     for i in range(n):
         for j in range(n):
-            if (i + j) % 2 == 0:
-                if i - j == k:
-                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
-    m.addLConstr(s<=1)
+            if i - j == k:
+                exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s>=1)
 
 # // diagonal
 for k in range(2*n):
     s = LinExpr(0)
     for i in range(n):
         for j in range(n):
-            if (i + j) % 2 == 0:
-                if i + j == k:
-                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
-    m.addLConstr(s<=1)
+            if i + j == k:
+                exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s>=1)
 
 m.optimize()
 

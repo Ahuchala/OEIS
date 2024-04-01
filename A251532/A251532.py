@@ -1,11 +1,10 @@
 # Code written by Andy Huchala
-# Computes a(n) for OEIS A251534 
-# (the minimum number of obtuse knights required to occupy or
-#  threaten all tiles on an n x n honeycomb chessboard)
+# Computes a(n) for OEIS A251532 
+# ( Independence number of the n-triangular 
+#   honeycomb obtuse knight graph)
+
 
 # Requires installing Gurobi
-
-
 
 # Select board size (n>4)
 n = 10
@@ -65,6 +64,7 @@ vars_ij = []
 for i in range(n):
     for j in range(n-i):
         exec("x_" + str(i) + "_" + str(j)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(i) + "_" + str(j) + "\")")
+        exec("y_" + str(i) + "_" + str(j)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"y_" + str(i) + "_" + str(j) + "\")")
 
         vars_ij.append((i,j))
 
@@ -80,7 +80,7 @@ for (i,j) in vars_ij:
 t = t[1:]
         
 exec("obj = " + t)
-m.setObjective(obj, GRB.MINIMIZE)
+m.setObjective(obj, GRB.MAXIMIZE)
 
 
 # specify constraints
@@ -88,8 +88,8 @@ for (i,j) in vars_ij:
     # find all the locations from which (i,j) could be attacked, add each one to the constraint
     # for (i,j): (i,j) must be attacked or occupied
     
-    s = "m.addLConstr("
-    s += "x_" + str(i) + "_" + str(j) + "+"
+    s = "m.addGenConstrOr("
+    s += "y_" + str(i) + "_" + str(j) + ", ["
     
 #     all the directions a piece can be threatened from
     dir_list = [(i+2,j+1),(i+1,j+2),
@@ -104,12 +104,13 @@ for (i,j) in vars_ij:
     
     for (a,b) in dir_list:
         if (a,b) in vars_ij:
-             s += "x_" + str(a) + "_" + str(b) + "+"
+             s += "x_" + str(a) + "_" + str(b) + ","
         
 
     s = s[:-1]
 
-    exec(s+ ">=1)")
+    exec(s+ "])")
+    exec("m.addLConstr(x_" + str(i) + "_" + str(j) + "+y_" + str(i) + "_" + str(j) + "<= 1)")
 
 
 m.optimize()

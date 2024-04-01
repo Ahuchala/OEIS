@@ -1,9 +1,9 @@
 # Code written by Andy Huchala
-# Computes a(n) for OEIS A352426 
+# Computes a(n) for OEIS 352426
 # (the maximal number of nonattacking
  # white-square queens on an n x n board)
 
-# possible g.f.: (-z^17 + z^16 + z^15 - z^14 - z^13 + z^12 + z^10 + z^9 + z^8 + z^7 + 2*z^4 + z^3 + z)/(z^11 - z^10 - z + 1)
+# possible g.f. (1 + z^3 + z^4 + z^6)/(1 - z - z^5 + z^6)
 
 # Requires installing Gurobi
 
@@ -16,51 +16,67 @@ m = Model("ip")
 # initialize all variables of form x_j_i
 for i in range(n):
     for j in range(n):
-        exec("x_" + str(j) + "_" + str(i)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(j) + "_" + str(i) + "\")")
+        if (i + j) % 2 == 1:
+            exec("x_" + str(i) + "_" + str(j)+" = m.addVar(lb=0,ub=1,vtype=GRB.INTEGER, name=\"x_" + str(i) + "_" + str(j) + "\")")
         
 
-# Set objective: minimize sum of x_i_j's
+# Set objective: maximize sum of x_i_j's
 
-t = "x_0_0"
+obj = LinExpr(0)
 
-for j in range(n):
-    for i in range(n):
-        if i + j != 0:
-            t += "+x_" + str(j) + "_" + str(i)
-        
-exec("obj = " + t)
+for i in range(n):
+    for j in range(n):
+        if (i + j) % 2 == 1:
+            exec("obj.add(x_" + str(i) + "_" + str(j) +")")
+
 m.setObjective(obj, GRB.MAXIMIZE)
 
 
 # specify constraints
-for j in range(n):
+
+# all row, column, and diagonal sums must be <= 1
+
+# look, the python code isn't pretty, but the result is efficient
+
+# columns
+for a in range(n):
+    s = LinExpr(0)
     for i in range(n):
-        # black tile
-        if (i+j)%2 != 0:
-            # find all the locations from which (i,j) could be attacked, add each one to the constraint
-            # for (i,j): (i,j) must be attacked or occupied
-            
-            s = "m.addGenConstrIndicator("
-            s += "x_" + str(j) + "_" + str(i) + ",1,"
-            for k in range(n):
-                if k != j:
-                    s += "x_" + str(k) + "_" + str(i) + "+"
-                if k != i:
-                    s += "x_" + str(j) + "_" + str(k) + "+"
-                if i-j+k>=0 and i-j+k<n:
-                    if k != j or (i-j+k) != i: 
-                        s += "x_" + str(k) + "_" + str(i-j+k) + "+"
-                if 2*i-(i-j+k)>=0 and 2*i-(i-j+k)<n:
-                    if k != j or 2*i-(i-j+k) != i:
-                        s += "x_" + str(k) + "_" + str(2*i-(i-j+k)) + "+"
+        for j in range(n):
+            if (i + j) % 2 == 1:
+                if a == i:
+                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s<=1)
 
-            s = s[:-1]
+# rows
+for b in range(n):
+    s = LinExpr(0)
+    for i in range(n):
+        for j in range(n):
+            if (i + j) % 2 == 1:
+                if b == j:
+                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s<=1)
 
-            exec(s+ "==0)")
-        else:
-            exec("m.addLConstr(x_" + str(j) + "_" + str(i) + "==0)")
+# \\ diagonal
+for k in range(-n,n):
+    s = LinExpr(0)
+    for i in range(n):
+        for j in range(n):
+            if (i + j) % 2 == 1:
+                if i - j == k:
+                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s<=1)
 
-
+# // diagonal
+for k in range(2*n):
+    s = LinExpr(0)
+    for i in range(n):
+        for j in range(n):
+            if (i + j) % 2 == 1:
+                if i + j == k:
+                    exec("s.add(x_" + str(i) + "_" + str(j) +")")
+    m.addLConstr(s<=1)
 
 m.optimize()
 
@@ -70,35 +86,31 @@ m.optimize()
 print('Obj: %g' % obj.getValue())
 
 # uncomment this to plot
-# printstr = ""
-# mgetVars = [v for v in m.getVars() if 'x_' in str(v)]
-# for v in mgetVars:
-#     printstr += str(int(v.x))
+
+
 # import numpy as np
 # import matplotlib.pyplot as plt
 
 # plt.rcParams["figure.figsize"] = (10,10)
 
-# # n = 10
-# s = printstr
-# # s = "0000000000001110000000100011100110001000000000001000000000100110001000001000111000111000000000000000"
-
 # M = np.zeros((n,n))
 
+# nonzero_vars = [a for a in m.getVars() if a.x > 0]
+# for a in nonzero_vars:
+#     foo,i,j = str(a).split("_")
+#     i = int(i)
+#     j = int(j.split(" ")[0])
+#     M[i][j] = 1
+# # for j in range(n):
+# #     for i in range(j,2*n-j-1):
+# #         if m.getVar("x_" + str(i) + "_" + str(j)).x > 0:
+# #             print(i,j)
+# #         else:
+# #             print(m.getVarByName("x_" + str(i) + "_" + str(j)))
+# #         M[i][j] = int(0.1+m.getVarByName("x_" + str(i) + "_" + str(j)).x)+1
 
-# for i in range(n):
-#     for j in range(n):
-#         # alternate checkerboard coloring
-#         # if int(s[j+n*i]) == 1:
-#         #     M[i][j] = 0.5
-#         # if int(s[j+n*i]) == 0:
-#         #     M[i][j] = -1-((1+i + j) % 2)/5
-#         if int(s[j+n*i]) == 1:
-#             M[i][j] = 1
-#         if int(s[j+n*i]) == 0:
-#             M[i][j] = 0
 
-# plt.matshow(M);
+# plt.matshow(M.transpose());
 
 # # plt.colorbar()
 # plt.axis('off')
