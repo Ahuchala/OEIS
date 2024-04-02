@@ -18,9 +18,10 @@ for _ in range(100):
 # Select board width (n>1)
 from gurobipy import *
 import math
+m = Model("ip")
 
 for n in range(2,104):
-    m = Model("ip")
+    
 
 
             
