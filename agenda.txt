@@ -1,0 +1,14 @@
+Currently Computing:
+A364665
+A342374
+A352241
+
+
+Worth Investigating:
+A269706
+A364666
+A251532
+A251534
+A287864
+A352426
+
