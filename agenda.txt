@@ -1,14 +1,22 @@
 Currently Computing:
-A364665
+A251532
 A342374
 A352241
+A352426
+
 
 
 Worth Investigating:
-A269706
-A364666
-A251532
 A251534
 A287864
-A352426
 
+Done:
+A269706
+A364666
+A364665
+
+
+Need to contribute (have terms to upload):
+A342374
+A251532
+A352426
