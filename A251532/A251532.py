@@ -6,8 +6,12 @@
 
 # Requires installing Gurobi
 
+
+import sys
+sys.setrecursionlimit(5000)
+
 # Select board size (n>4)
-n = 10
+n = 59
 
 from gurobipy import *
 import math
@@ -68,18 +72,20 @@ for i in range(n):
 
         vars_ij.append((i,j))
 
+print(len(vars_ij),(n*(n+1))//2)
 assert(len(vars_ij)==(n*(n+1))//2)
             
 # Set objective: minimize sum of x_i_j's
 
 
-t = ""
+t = LinExpr(0)
 
 for (i,j) in vars_ij:
-    t += "+x_" + str(i) + "_" + str(j)
-t = t[1:]
-        
-exec("obj = " + t)
+    exec("t.add(x_" + str(i) + "_" + str(j) + ")")
+# t = t[1:]
+
+obj = t
+
 m.setObjective(obj, GRB.MAXIMIZE)
 
 
@@ -111,7 +117,6 @@ for (i,j) in vars_ij:
 
     exec(s+ "])")
     exec("m.addLConstr(x_" + str(i) + "_" + str(j) + "+y_" + str(i) + "_" + str(j) + "<= 1)")
-
 
 m.optimize()
 
