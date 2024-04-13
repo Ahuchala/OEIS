@@ -93,16 +93,16 @@ for n in range(0,500):
     print(n,ls[n])
     print(ls)
 
-    plt.rcParams["figure.figsize"] = (10,10)
+    # plt.rcParams["figure.figsize"] = (10,10)
 
-    M = np.zeros((n,(n+1)//2))
+    # M = np.zeros((n,(n+1)//2))
 
-    nonzero_vars = [a for a in m.getVars() if a.x > 0]
-    for a in nonzero_vars:
-        foo,i,j = str(a).split("_")
-        i = int(i)
-        j = int(j.split(" ")[0])
-        M[i][j] = 1
+    # nonzero_vars = [a for a in m.getVars() if a.x > 0]
+    # for a in nonzero_vars:
+    #     foo,i,j = str(a).split("_")
+    #     i = int(i)
+    #     j = int(j.split(" ")[0])
+    #     M[i][j] = 1
     # for j in range(n):
     #     for i in range(j,2*n-j-1):
     #         if m.getVar("x_" + str(i) + "_" + str(j)).x > 0:
@@ -112,9 +112,9 @@ for n in range(0,500):
     #         M[i][j] = int(0.1+m.getVarByName("x_" + str(i) + "_" + str(j)).x)+1
 
 
-    plt.matshow(M.transpose());
+    # plt.matshow(M.transpose());
 
     # plt.colorbar()
-    plt.axis('off')
-    exec("plt.savefig('C:/Users/Ahuch/Documents/GitHub/OEIS/Images/A287864_" + str(n) + ".png')")
-    plt.show()
+    # plt.axis('off')
+    # exec("plt.savefig('C:/Users/Ahuch/Documents/GitHub/OEIS/Images/A287864_" + str(n) + ".png')")
+    # plt.show()
