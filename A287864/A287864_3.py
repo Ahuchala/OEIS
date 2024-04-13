@@ -17,7 +17,7 @@ ls = [0]
 for _ in range(500):
     ls.append(0)
 # Select board width (n>1)
-for n in range(0,500):
+for n in range(1,500):
 
 
     # initialize all variables of form x_j_i
