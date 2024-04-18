@@ -8,17 +8,18 @@
 
 # Requires installing Gurobi
 
-
-
+import sys
+sys.setrecursionlimit(5000)
 # Select board size (n>4)
 ls = [0]
+ls += [8, 7, 7, 8, 9, 12, 15, 17, 19, 20, 21, 24, 25, 28, 31, 34, 37, 39, 42, 45]
 for _ in range(100):
     ls.append(0)
 # Select board width (n>1)
 from gurobipy import *
 import math
 m = Model("ip")
-for n in range(5,104):
+for n in range(25,25+100):
 
     # example with n = 4
     #  __

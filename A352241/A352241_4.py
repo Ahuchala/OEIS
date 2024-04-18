@@ -1,3 +1,5 @@
+# duplicate version meant for practice tuning
+
 # Code written by Andy Huchala
 # Computes a(n) for OEIS A352241
 # (the maximal number of nonattacking
@@ -8,12 +10,28 @@
 # Requires installing Gurobi
 
 # Select board size (n>1)
-n = 19
+n = 51
 
 from gurobipy import *
 m = Model("ip")
 
+# these were some good parameters found for n = 50
 
+        # BranchDir 1
+        # Heuristics 0
+        # VarBranch 1
+        # Cuts 0
+        # PreDepRow 1
+# m.setParam("Method", 0)
+# m.setParam("SimplexPricing", 0)
+# m.setParam("BranchDir", 1)
+# m.setParam("DegenMoves", 9)
+# m.setParam("Heuristics", 0)
+# m.setParam("Varbranch", 1)
+# m.setParam("Cuts", 0)
+# m.setParam("PrePasses", 5)
+# m.setParam("Presolve", 2)
+# m.setParam("PreDepRow", 1)
 
 # initialize all variables of form x_j_i
 for i in range(n):
