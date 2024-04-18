@@ -13,10 +13,11 @@ n = 7
 MAX_VALUE = 4000000 # upper bound on a(n)
 PRINT_SOLUTION = True # whether or not to print the objective and an example solution
 
+import math
 from docplex.mp.model import Model
 import cplex
 
-print("Computing A103315(n) for n =", str(n))
+print("Computing A000755(n) for n =", str(n))
 
 # this function ripped from https://stackoverflow.com/questions/60759169/how-to-increase-number-of-cplex-solutions
 def generate_soln_pool(mdl):      
@@ -84,7 +85,7 @@ for (p,q) in pts:
                     l += "+x_" + str(i) + "_" + str(j)
                 l += "+x_" + str(P_x) + "_" + str(P_y)
                 l = l[1:]
-                exec("im.add_constraint)" + l + "<=2)")
+                exec("im.add_constraint(" + l + "<=2)")
 
         p *= -1
         S = pts.copy()
@@ -100,7 +101,7 @@ for (p,q) in pts:
                     l += "+x_" + str(i) + "_" + str(j)
                 l += "+x_" + str(P_x) + "_" + str(P_y)
                 l = l[1:]
-                exec("im.add_constraint)" + l + "<=2)")
+                exec("im.add_constraint(" + l + "<=2)")
 
 im.solve()
 if PRINT_SOLUTION:
