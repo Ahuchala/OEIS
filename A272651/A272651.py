@@ -8,6 +8,7 @@
 # Select board size (n>1)
 n = 19
 
+import math
 from gurobipy import *
 m = Model("ip")
 
@@ -52,7 +53,7 @@ for p in range(n):
 
 for (p,q) in pts:
     # s = p/q
-    if gcd(p,q) == 1: # since gcd(0,0) = 0
+    if math.gcd(p,q) == 1: # since gcd(0,0) = 0
         S = pts.copy()
         while len(S) > 0:
             P_x, P_y = S.pop()
@@ -64,6 +65,7 @@ for (p,q) in pts:
                 l = LinExpr(0)
                 for (i,j) in T:
                     exec("l.add(x_" + str(i) + "_" + str(j) +")")
+                exec("l.add(x_" + str(P_x) + "_" + str(P_y) +")")
                 m.addLConstr(l<=2)
 
         p *= -1
@@ -78,12 +80,13 @@ for (p,q) in pts:
                 l = LinExpr(0)
                 for (i,j) in T:
                     exec("l.add(x_" + str(i) + "_" + str(j) +")")
+                exec("l.add(x_" + str(P_x) + "_" + str(P_y) +")")
                 m.addLConstr(l<=2)
 
 
 m.optimize()
 
-# for v in m.getVars():
+# for v in m.getVars(): 
 #     print('%s %g' % (v.varName, v.x))
 
 print('Obj: %g' % obj.getValue())
