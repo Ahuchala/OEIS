@@ -13,6 +13,9 @@ sys.setrecursionlimit(5000)
 # Select board size (n>4)
 n = 59
 
+# a[n] is very close to floor(n*(n+1)/6) (+ 1 if n = 2 % 3) for n > 30
+# this fails for n = 253
+
 from gurobipy import *
 import math
 m = Model("ip")
