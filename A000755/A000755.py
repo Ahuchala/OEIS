@@ -8,14 +8,14 @@
 # Requires installing cplex
 
 # Select board size (n>1)
-n = 7
+n = 3
 
 MAX_VALUE = 4000000 # upper bound on a(n)
 PRINT_SOLUTION = True # whether or not to print the objective and an example solution
 
-import math
 from docplex.mp.model import Model
 import cplex
+import math
 
 print("Computing A000755(n) for n =", str(n))
 
@@ -23,8 +23,8 @@ print("Computing A000755(n) for n =", str(n))
 def generate_soln_pool(mdl):      
     cpx = mdl.get_cplex()
     cpx.parameters.mip.pool.intensity.set(4)
-    cpx.parameters.mip.pool.absgap.set(0.1)
-    cpx.parameters.mip.pool.relgap.set(0.1)
+    cpx.parameters.mip.pool.absgap.set(0.01)
+    cpx.parameters.mip.pool.relgap.set(0.01)
     cpx.parameters.mip.limits.populate.set(MAX_VALUE)
 
     try:
@@ -33,41 +33,49 @@ def generate_soln_pool(mdl):
         print("Exception raised during populate")
         return []
     numsol = cpx.solution.pool.get_num()
-    return(numsol)
+    # return(numsol)
 
     # this will return the actual values
-    # nb_vars = mdl.number_of_variables
-    # sol_pool = []
-    # for i in range(numsol):
+    nb_vars = mdl.number_of_variables
+    sol_pool = []
+    for i in range(numsol):
 
-    #     x_i = cpx.solution.pool.get_values(i)
-    #     assert len(x_i) == nb_vars
-    #     sol = mdl.new_solution()
-    #     for k in range(nb_vars):
-    #         vk = mdl.get_var_by_index(k)
-    #         sol.add_var_value(vk, x_i[k])
-    #     sol_pool.append(sol)
-    # return sol_pool
+        x_i = cpx.solution.pool.get_values(i)
+        assert len(x_i) == nb_vars
+        sol = mdl.new_solution()
+        for k in range(nb_vars):
+            vk = mdl.get_var_by_index(k)
+            sol.add_var_value(vk, x_i[k])
+        sol_pool.append(sol)
+    return sol_pool
 
 
 im = Model(name='ip_3_no_in_line')
 
-for j in range(n):
-    for i in range(n):
-        exec("x_" + str(j) + "_" + str(i) + " = im.integer_var(0, 1,name=  \"" + "x_" + str(j) + "_" + str(i) + "\")")
+for i in range(n):
+    for j in range(n):
+        exec("x_" + str(i) + "_" + str(j) + " = im.integer_var(0, 1,name=  \"" + "x_" + str(i) + "_" + str(j) + "\")")
 
 
 s = "x_0_0"
-for j in range(n):
-    for i in range(n):
+for i in range(n):
+    for j in range(n):
         if i + j != 0:
-            s += "+ x_"+ str(j) + "_" + str(i)
+            s += "+ x_"+ str(i) + "_" + str(j)
 exec("im.maximize(" + s + ")")
+
+s = "x_0_0"
+for i in range(n):
+    for j in range(n):
+        if i + j != 0:
+            s += "+ x_"+ str(i) + "_" + str(j)
+exec("im.add_constraint(" + s + "== " + str(2*n) + ")")
 
 pts = set()
 for p in range(n):
     for q in range(n):
         pts.add(tuple([p,q]))
+
 
 for (p,q) in pts:
     # s = p/q
@@ -79,7 +87,7 @@ for (p,q) in pts:
             T = [(i,j) for (i,j) in S if q*(j-P_y) == p*(i-P_x)]
             for pt in T:
                 S.remove(pt)
-            if len(T)>2:
+            if len(T)>1:
                 l = ""
                 for (i,j) in T:
                     l += "+x_" + str(i) + "_" + str(j)
@@ -95,7 +103,7 @@ for (p,q) in pts:
             T = [(i,j) for (i,j) in S if q*(j-P_y) == p*(i-P_x)]
             for pt in T:
                 S.remove(pt)
-            if len(T)>2:
+            if len(T)>1:
                 l = ""
                 for (i,j) in T:
                     l += "+x_" + str(i) + "_" + str(j)

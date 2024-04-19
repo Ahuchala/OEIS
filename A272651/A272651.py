@@ -61,7 +61,7 @@ for (p,q) in pts:
             T = [(i,j) for (i,j) in S if q*(j-P_y) == p*(i-P_x)]
             for pt in T:
                 S.remove(pt)
-            if len(T)>2:
+            if len(T)>1:
                 l = LinExpr(0)
                 for (i,j) in T:
                     exec("l.add(x_" + str(i) + "_" + str(j) +")")
@@ -76,7 +76,7 @@ for (p,q) in pts:
             T = [(i,j) for (i,j) in S if q*(j-P_y) == p*(i-P_x)]
             for pt in T:
                 S.remove(pt)
-            if len(T)>2:
+            if len(T)>1:
                 l = LinExpr(0)
                 for (i,j) in T:
                     exec("l.add(x_" + str(i) + "_" + str(j) +")")
