@@ -8,10 +8,11 @@
 # Requires installing cplex
 
 # Select board size (n>1)
-n = 3
+n = 19
 
 MAX_VALUE = 4000000 # upper bound on a(n)
 PRINT_SOLUTION = True # whether or not to print the objective and an example solution
+WRITE_TO_FILE = True
 
 from docplex.mp.model import Model
 import cplex
@@ -115,4 +116,12 @@ im.solve()
 if PRINT_SOLUTION:
     im.print_solution()
 
-print(generate_soln_pool(im))
+s = generate_soln_pool(im)
+# for _ in s:
+#     print(_)
+print(len(s))
+
+if WRITE_TO_FILE:
+    with open("output.txt", "w") as f:
+        for _ in s:
+            f.write(str(_) + "\n")

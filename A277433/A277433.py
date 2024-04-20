@@ -1,5 +1,5 @@
 # Code written by Andy Huchala
-# based on Rob Pratt's suggested IP
+# based on Rob Pratt's suggested IP in A219760
 
 # Computes a(n) for OEIS A277433
 # (Martin Gardner's all slopes minimal no-3-in-a-line problem.
@@ -14,7 +14,7 @@
 # Requires installing Gurobi
 
 # Select board size (n>1)
-n = 8
+n = 11
 
 import math
 from gurobipy import *
@@ -137,8 +137,8 @@ for i in range(n):
 
 m.optimize()
 
-for v in m.getVars(): 
-    print('%s %g' % (v.varName, v.x))
+# for v in m.getVars(): 
+#     print('%s %g' % (v.varName, v.x))
 
 print('Obj: %g' % obj.getValue())
 
