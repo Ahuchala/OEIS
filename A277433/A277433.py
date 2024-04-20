@@ -1,8 +1,8 @@
 # Code written by Andy Huchala
 # based on Rob Pratt's suggested IP
 
-# Computes a(n) for OEIS A219760
-# (Martin Gardner's minimal no-3-in-a-line problem.
+# Computes a(n) for OEIS A277433
+# (Martin Gardner's all slopes minimal no-3-in-a-line problem.
     
 # a(n) is the minimal number of counters that can 
 # be placed on an n X n chessboard, no three in a line, 

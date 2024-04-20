@@ -1,6 +1,5 @@
 Currently Computing:
 A251532
-A342374
 A352241
 A352426
 A287864
@@ -10,7 +9,6 @@ A272651
 
 
 Worth Investigating:
-
 A219760
 A277433
 
@@ -19,6 +17,7 @@ A269706
 A364666
 A364665
 A251534
+A342374
 
 
 Need to contribute (have terms to upload):
