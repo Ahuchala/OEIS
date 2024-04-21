@@ -4,10 +4,12 @@
 #   A variant of Zarankiewicz problem: maximal number of
 #   1s in n X n 01-matrix with no four 1s forming a rectangle.
 
+# Senya Karpenko notes that for prime powers q, a(q^2+q+1) = (q+1)(q^2+q+1).
+
 # Requires installing Gurobi
 
 # Select board size (n>1)
-n = 11
+n = 13
 
 import math
 from gurobipy import *
@@ -43,8 +45,8 @@ m.setObjective(obj, GRB.MAXIMIZE)
 # i,j is top left vertex
 for i in range(n-1):
     for j in range(n-1):
-        for a in range(i,n):
-            for b in range(j,n):
+        for a in range(1,n-i):
+            for b in range(1,n-j):
                 l = LinExpr(0)
                 exec("l.add(x_" + str(i) + "_" + str(j) + ")")
                 exec("l.add(x_" + str(i+a) + "_" + str(j) + ")")
