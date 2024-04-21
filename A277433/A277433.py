@@ -9,8 +9,6 @@
 # such that adding one more counter on any vacant square 
 # will produce three in a line.
 
-# TODO: currently incorect as it only computes for all slopes
-
 # Requires installing Gurobi
 
 # Select board size (n>1)

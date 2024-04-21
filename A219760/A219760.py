@@ -12,14 +12,11 @@
 # Requires installing Gurobi
 
 # Select board size (n>1)
-n = 28
+n = 10
 
 import math
 from gurobipy import *
 m = Model("ip")
-
-DEBUG = True
-
 
 # specify constraints
 
@@ -111,34 +108,3 @@ m.optimize()
 #     print('%s %g' % (v.varName, v.x))
 
 print('Obj: %g' % obj.getValue())
-
-# uncomment this to plot
-
-
-# import numpy as np
-# import matplotlib.pyplot as plt
-
-# plt.rcParams["figure.figsize"] = (10,10)
-
-# M = np.zeros((n,n))
-
-# nonzero_vars = [a for a in m.getVars() if a.x > 0]
-# for a in nonzero_vars:
-#     foo,i,j = str(a).split("_")
-#     i = int(i)
-#     j = int(j.split(" ")[0])
-#     M[i][j] = 1
-# # for j in range(n):
-# #     for i in range(j,2*n-j-1):
-# #         if m.getVar("x_" + str(i) + "_" + str(j)).x > 0:
-# #             print(i,j)
-# #         else:
-# #             print(m.getVarByName("x_" + str(i) + "_" + str(j)))
-# #         M[i][j] = int(0.1+m.getVarByName("x_" + str(i) + "_" + str(j)).x)+1
-
-
-# plt.matshow(M.transpose());
-
-# # plt.colorbar()
-# plt.axis('off')
-# plt.show()
