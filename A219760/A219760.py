@@ -12,7 +12,7 @@
 # Requires installing Gurobi
 
 # Select board size (n>1)
-n = 10
+n = 34
 
 import math
 from gurobipy import *
@@ -104,7 +104,7 @@ for i in range(n):
 
 m.optimize()
 
-# for v in m.getVars(): 
-#     print('%s %g' % (v.varName, v.x))
+for v in m.getVars(): 
+    print('%s %g' % (v.varName, v.x))
 
 print('Obj: %g' % obj.getValue())

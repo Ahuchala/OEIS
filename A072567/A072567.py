@@ -9,7 +9,7 @@
 # Requires installing Gurobi
 
 # Select board size (n>1)
-n = 13
+n = 25
 
 import math
 from gurobipy import *
