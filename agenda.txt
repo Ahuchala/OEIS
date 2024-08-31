@@ -2,13 +2,13 @@ Currently Computing:
 A251532
 A219760
 
-A272651
+
 A277433
 
 
 
 Worth Investigating:
-A000755 (slow)
+A000755 (slow cplex enumeration)
 
 
 Done:
@@ -20,10 +20,12 @@ A342374
 A287864
 A352426
 A352241
+A272651
 
 
 Need to contribute (have terms to upload):
 A251532
+A219760	
 
 A352426
 A342374
