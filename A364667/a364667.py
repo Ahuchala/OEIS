@@ -1,7 +1,7 @@
 # Code written by Andy Huchala
 # Computes a(n) for OEIS A364667
-# Number of nodes in regular n-gon 
-# with all diagonals drawn.
+# Lower independence number of the 
+# n-diagonal intersection graph.
 
 
 # Requires installing Gurobi
@@ -38,7 +38,7 @@ for i in range(1,1+A007569[n]):
 
 
             
-# Set objective: maximize sum of x_i's
+# Set objective: minimize sum of x_i's
 
 
 obj = LinExpr(0)
@@ -46,18 +46,35 @@ for i in range(1,1+A007569[n]):
     exec(f"obj.add(x_{i})")
 
 
-m.setObjective(obj, GRB.MAXIMIZE)
+m.setObjective(obj, GRB.MINIMIZE)
 
 
 # specify constraints
+
+# Lower independence number is the same as the minimum size of an independent dominating set
+
+# This assert independence
 for (a,b) in adjacent_vertices:
     # only one of vertex in an adjacent pair can appear
     
     constraint = LinExpr(0)
-    exec(f"constraint.add(x_{i})")
-    exec(f"constraint.add(x_{i})")
+    exec(f"constraint.add(x_{a})")
+    exec(f"constraint.add(x_{b})")
 
-    exec(f"m.addLConstr({constraint}<=1)")
+    exec(f"m.addLConstr(constraint<=1)")
+
+# This asserts dominance
+for i in range(1,1+A007569[n]):
+    # make sure x_i is covered
+    constraint = LinExpr(0)
+    exec(f"constraint.add(x_{i})")
+    for (a,b) in adjacent_vertices:
+        if a == i:
+            exec(f"constraint.add(x_{b})")
+        elif b == i:
+            exec(f"constraint.add(x_{a})")
+
+    exec(f"m.addLConstr(constraint>=1)")
 
 m.optimize()
 
