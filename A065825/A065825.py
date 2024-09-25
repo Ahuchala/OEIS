@@ -61,12 +61,10 @@ exec(f"m.addLConstr(constraint=={n})")
 
 # require x_j = 0 if y_i = 1 for j >= i
 for i in range(1,k+1):
-	
+	constraint = LinExpr(0)
 	for j in range(i,k+1):
-		constraint = LinExpr(0)
-		exec(f"constraint.add(y_{i})")
 		exec(f"constraint.add(x_{j})")
-		exec(f"m.addLConstr(constraint<=1)")			
+	exec(f"m.addGenConstrIndicator(y_{i},True,constraint==0)")			
 
 
 m.optimize()
