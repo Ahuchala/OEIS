@@ -71,13 +71,15 @@ for k in range(1,d):
 
 
 # specify constraints
-for i in vertex_set:
-	constraint = LinExpr(0)
+for i in vertex_set: 
 	for pt in neighbor_set:
-		if pt^i in vertex_set:
-			exec(f"constraint.add(x_{pt^i})")
+		if pt^i in vertex_set and pt^i > i: #prevent double counting
+			constraint = LinExpr(0)
 
-	exec(f"m.addGenConstrIndicator(x_{i},True,constraint==0)")
+			exec(f"constraint.add(x_{pt^i})")
+			exec(f"constraint.add(x_{i})")
+
+			exec(f"m.addLConstr(constraint <=1)")
 
 m.optimize()
 
