@@ -45,7 +45,7 @@ for i in vertex_set:
 
 	for j in vertex_set:
 
-		# check if at most d bits are different
+		# iterate through all k bit swaps for k = 1...d
 		constraint = LinExpr(0)
 		if i!=j and sum(map(int,format(i^j,'b')))<d:
 
