@@ -9,7 +9,7 @@
 
 
 # Select board size
-n = 9
+n = 8
 
 from gurobipy import *
 import math
